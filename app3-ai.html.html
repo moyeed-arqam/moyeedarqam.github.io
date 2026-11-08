@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Prompt Generator</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; height: 100vh; box-sizing: border-box; display: flex; flex-direction: column; }
+        .terminal { flex-grow: 1; border: 1px solid #333; padding: 20px; background: #0a0a0a; border-radius: 8px; overflow-y: auto; box-shadow: 0 0 20px rgba(0,255,0,0.1); }
+        .line { margin-bottom: 5px; line-height: 1.4; white-space: pre-wrap; }
+        .prompt { color: #fff; }
+        .input-line { display: flex; margin-top: 10px; }
+        .input-line span { margin-right: 10px; }
+        input { background: transparent; border: none; color: #0f0; font-family: monospace; font-size: 1rem; outline: none; flex-grow: 1; }
+        .btn { background: #333; color: #0f0; border: 1px solid #0f0; padding: 10px; cursor: pointer; margin-top: 10px; font-family: monospace; }
+        .btn:hover { background: #0f0; color: #000; }
+    </style>
+</head>
+<body>
+    <div class="terminal" id="terminal">
+        <div class="line">> Initializing AI Engine...</div>
+        <div class="line">> Ready to generate website scaffolding.</div>
+        <div class="line prompt">> Please enter a project topic (e.g., "Portfolio", "E-commerce", "Blog"):</div>
+    </div>
+    <div class="input-line">
+        <span>></span>
+        <input type="text" id="userInput" placeholder="Type topic and press enter..." autofocus>
+    </div>
+    
+    <script>
+        const terminal = document.getElementById('terminal');
+        const input = document.getElementById('userInput');
+
+        input.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && input.value.trim() !== '') {
+                const topic = input.value;
+                input.value = '';
+                input.disabled = true;
+                
+                addLine(`> ${topic}`, 'prompt');
+                setTimeout(() => addLine('> Analyzing requirements...'), 500);
+                setTimeout(() => addLine('> Structuring HTML and CSS...'), 1200);
+                setTimeout(() => {
+                    addLine(`[SUCCESS] Generated 3 page files for "${topic}":`);
+                    addLine(`- index.html (Hero, Features, CTA)`);
+                    addLine(`- styles.css (Responsive Grid, Variables)`);
+                    addLine(`- script.js (Form validation, Smooth Scroll)`);
+                    addLine('> Done. Ready for next prompt.');
+                    input.disabled = false;
+                    input.focus();
+                }, 2500);
+            }
+        });
+
+        function addLine(text, className = '') {
+            const div = document.createElement('div');
+            div.className = `line ${className}`;
+            div.innerText = text;
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+    </script>
+</body>
+</html>
