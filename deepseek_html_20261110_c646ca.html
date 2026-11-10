@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro AI Prompter</title>
+    <style>
+        :root { --bg: #0a0410; --surface: rgba(30, 15, 45, 0.6); --border: #3b2b4d; --accent: #00ff88; --text: #fff; --muted: #b3a5c2; }
+        body { background: radial-gradient(circle at bottom left, #1a0a2e 0%, #0a0410 100%); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; padding: 40px; min-height: 100vh; }
+        .header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 40px; font-family: 'JetBrains Mono', monospace; }
+        .logo { font-size: 1.5rem; color: var(--accent); font-weight: bold; }
+        .back-btn { color: var(--muted); text-decoration: none; border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; transition: 0.3s; }
+        .back-btn:hover { color: var(--accent); border-color: var(--accent); }
+        h1 { font-family: 'JetBrains Mono', monospace; font-size: 2.5rem; margin-bottom: 10px; }
+        .subtitle { color: var(--muted); margin-bottom: 40px; font-family: 'JetBrains Mono', monospace; }
+        
+        .layout { display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px; }
+        .panel { background: var(--surface); border: 1px solid var(--border); padding: 30px; border-radius: 16px; backdrop-filter: blur(10px); }
+        .panel h2 { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 0.9rem; font-family: 'JetBrains Mono', monospace; }
+        input, select { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 8px; font-family: inherit; outline: none; box-sizing: border-box; transition: 0.3s; }
+        input:focus, select:focus { border-color: var(--accent); }
+        
+        .generate-btn { width: 100%; background: var(--accent); color: #000; border: none; padding: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 1rem; margin-top: 10px; transition: 0.3s; }
+        .generate-btn:hover { box-shadow: 0 0 20px rgba(0,255,136,0.3); }
+
+        .output-box { background: #000; border: 1px dashed var(--border); padding: 25px; border-radius: 8px; min-height: 350px; color: #a5d6ff; white-space: pre-wrap; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; line-height: 1.6; position: relative; }
+        .copy-btn { position: absolute; top: 15px; right: 15px; background: #222; color: #fff; border: 1px solid #444; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; transition: 0.3s; }
+        .copy-btn:hover { background: var(--accent); color: #000; }
+        
+        .placeholder-text { color: #444; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="header"><div class="logo">Prompt_Engine</div><a href="index.html" class="back-btn">← Back</a></div>
+    <h1>Pro AI Prompter</h1>
+    <p class="subtitle">Generate highly structured prompts for ChatGPT, Claude, or Midjourney.</p>
+
+    <div class="layout">
+        <div class="panel">
+            <h2>Prompt Configuration</h2>
+            <div class="form-group">
+                <label>AI Role</label>
+                <select id="role">
+                    <option value="an expert Frontend Developer">Frontend Developer</option>
+                    <option value="a Senior WordPress Architect">WordPress Architect</option>
+                    <option value="a C++ Systems Engineer">C++ Engineer</option>
+                    <option value="an SEO & Performance Specialist">SEO Specialist</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Task</label>
+                <input type="text" id="task" placeholder="e.g. Build a responsive pricing page" value="Build a fully responsive pricing page">
+            </div>
+            <div class="form-group">
+                <label>Tech Stack / Constraints</label>
+                <input type="text" id="tech" placeholder="e.g. HTML, CSS, Vanilla JS" value="HTML, CSS Grid, Vanilla JS. No frameworks.">
+            </div>
+            <div class="form-group">
+                <label>Tone</label>
+                <select id="tone">
+                    <option value="Professional and direct">Professional</option>
+                    <option value="Casual and creative">Casual</option>
+                    <option value="Academic and highly detailed">Academic</option>
+                    <option value="Hacker/Terminal style">Hacker/Terminal</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Complexity / Detail Level</label>
+                <select id="complexity">
+                    <option value="Short and concise.">Short & Concise</option>
+                    <option value="Detailed and comprehensive with comments.">Detailed & Comprehensive</option>
+                    <option value="Production-ready with error handling.">Production-Ready</option>
+                </select>
+            </div>
+            <button class="generate-btn" onclick="generatePrompt()">Generate Prompt</button>
+        </div>
+
+        <div class="panel">
+            <h2>Generated Prompt</h2>
+            <div class="output-box" id="output">
+                <span class="placeholder-text">Your highly optimized prompt will appear here...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function generatePrompt() {
+            const role = document.getElementById('role').value;
+            const task = document.getElementById('task').value || '[Task]';
+            const tech = document.getElementById('tech').value || '[Tech]';
+            const tone = document.getElementById('tone').value;
+            const complexity = document.getElementById('complexity').value;
+
+            const prompt = `Act as ${role}.
+
+### CONTEXT:
+${task}
+
+### CONSTRAINTS & TECH STACK:
+${tech}
+
+### TONE:
+${tone}
+
+### COMPLEXITY LEVEL:
+${complexity}
+
+### RULES:
+- Ensure the solution is robust and well-structured.
+- Prioritize performance and accessibility.
+- Do not use deprecated code or unnecessary libraries.
+
+### OUTPUT FORMAT:
+Output only the final result.`;
+
+            const outputBox = document.getElementById('output');
+            outputBox.innerText = prompt;
+
+            if(!document.querySelector('.copy-btn')) {
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.innerText = 'Copy';
+                copyBtn.onclick = () => {
+                    navigator.clipboard.writeText(prompt);
+                    copyBtn.innerText = 'Copied!';
+                    setTimeout(() => copyBtn.innerText = 'Copy', 2000);
+                };
+                outputBox.appendChild(copyBtn);
+            }
+        }
+    </script>
+</body>
+</html>

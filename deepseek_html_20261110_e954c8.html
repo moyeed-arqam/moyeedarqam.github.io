@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced CGPA Calculator</title>
+    <style>
+        :root { --bg: #04100a; --surface: rgba(10, 30, 20, 0.6); --border: #1e3a2f; --accent: #00ff88; --text: #fff; --muted: #84a59d; }
+        body { background: radial-gradient(circle at top left, #0a2e1d 0%, #04100a 100%); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; padding: 40px; min-height: 100vh; }
+        .header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 40px; font-family: 'JetBrains Mono', monospace; }
+        .logo { font-size: 1.5rem; color: var(--accent); font-weight: bold; }
+        .back-btn { color: var(--muted); text-decoration: none; border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; transition: 0.3s; }
+        .back-btn:hover { color: var(--accent); border-color: var(--accent); }
+        h1 { font-family: 'JetBrains Mono', monospace; font-size: 2.5rem; margin-bottom: 10px; }
+        .subtitle { color: var(--muted); margin-bottom: 40px; font-family: 'JetBrains Mono', monospace; }
+        
+        .layout { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+        .panel { background: var(--surface); border: 1px solid var(--border); padding: 30px; border-radius: 16px; backdrop-filter: blur(10px); }
+        .panel h2 { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        
+        .top-options { display: flex; gap: 15px; margin-bottom: 25px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
+        .top-options input { background: transparent; border: none; border-bottom: 1px solid var(--muted); color: #fff; font-family: 'JetBrains Mono', monospace; width: 80px; text-align: center; outline: none; }
+        .top-options input:focus { border-bottom-color: var(--accent); }
+        .top-options label { color: var(--muted); font-size: 0.85rem; display: flex; align-items: center; gap: 10px; }
+
+        .sem-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .sem-tab { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 8px 20px; border-radius: 8px; cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: 0.3s; }
+        .sem-tab.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: bold; }
+        
+        .course-input { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; margin-bottom: 20px; }
+        input, select { background: rgba(0,0,0,0.4); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 8px; font-family: inherit; outline: none; transition: 0.3s; }
+        input:focus, select:focus { border-color: var(--accent); }
+        button.add-btn { background: var(--accent); color: #000; border: none; padding: 0 20px; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { color: var(--muted); font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; }
+        .del { color: #ff5f56; cursor: pointer; font-weight: bold; background: none; border: none; }
+        
+        .result-panel { display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .circle-container { position: relative; width: 200px; height: 200px; margin-bottom: 20px; }
+        .circle-svg { width: 200px; height: 200px; transform: rotate(-90deg); }
+        .circle-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 12; }
+        .circle-progress { fill: none; stroke: var(--accent); stroke-width: 12; stroke-linecap: round; stroke-dasharray: 565; stroke-dashoffset: 565; transition: stroke-dashoffset 1s ease-out, stroke 0.5s; }
+        .circle-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem; font-weight: bold; font-family: 'JetBrains Mono', monospace; }
+        
+        .target-box { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .target-box h3 { font-size: 0.9rem; color: var(--muted); margin-bottom: 10px; }
+        .target-input-row { display: flex; gap: 10px; align-items: center; }
+        .target-input-row input { width: 80px; text-align: center; }
+        .target-feedback { font-size: 0.85rem; margin-top: 10px; font-weight: bold; }
+
+        .summary-stats { width: 100%; display: flex; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 20px; }
+        .summary-stats div { text-align: center; }
+        .summary-stats h4 { font-size: 1.5rem; margin-bottom: 5px; }
+        .summary-stats p { font-size: 0.8rem; color: var(--muted); margin: 0; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <div class="header"><div class="logo">CGPA++</div><a href="index.html" class="back-btn">← Back</a></div>
+    <h1>Advanced GPA Calculator</h1>
+    <p class="subtitle">Track semesters, transfer credits, and target goals.</p>
+
+    <div class="layout">
+        <div class="panel">
+            <h2>Course Management</h2>
+            
+            <div class="top-options">
+                <label>Prev. Credits: <input type="number" id="prevCredits" value="0" onchange="calculateCGPA()"></label>
+                <label>Prev. CGPA: <input type="number" id="prevCGPA" value="0.0" step="0.01" onchange="calculateCGPA()"></label>
+            </div>
+
+            <div class="sem-tabs" id="semTabs">
+                <button class="sem-tab active" onclick="switchSemester(1)">Semester 1</button>
+                <button class="sem-tab" onclick="switchSemester(2)">Semester 2</button>
+                <button class="sem-tab" onclick="switchSemester(3)">Semester 3</button>
+            </div>
+            
+            <div class="course-input">
+                <input type="text" id="cName" placeholder="Course Name">
+                <input type="number" id="cCredits" placeholder="Credits" min="1" max="6">
+                <select id="cGrade">
+                    <option value="4.0">A (4.0)</option><option value="3.7">A- (3.7)</option>
+                    <option value="3.3">B+ (3.3)</option><option value="3.0">B (3.0)</option>
+                    <option value="2.7">B- (2.7)</option><option value="2.3">C+ (2.3)</option>
+                    <option value="2.0">C (2.0)</option><option value="1.0">D (1.0)</option>
+                    <option value="0.0">F (0.0)</option>
+                </select>
+                <button class="add-btn" onclick="addCourse()">Add</button>
+            </div>
+
+            <table>
+                <thead><tr><th>Course</th><th>Credits</th><th>Grade</th><th>Action</th></tr></thead>
+                <tbody id="courseTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="panel result-panel">
+            <h2>Academic Standing</h2>
+            <div class="circle-container">
+                <svg class="circle-svg">
+                    <circle class="circle-bg" cx="100" cy="100" r="90"></circle>
+                    <circle class="circle-progress" id="progressCircle" cx="100" cy="100" r="90"></circle>
+                </svg>
+                <div class="circle-text" id="cgpaDisplay">0.0</div>
+            </div>
+            <p style="color: var(--muted); margin-bottom: 20px;">Overall CGPA</p>
+            
+            <div class="target-box">
+                <h3>Target CGPA Calculator</h3>
+                <div class="target-input-row">
+                    <span>Target:</span>
+                    <input type="number" id="targetCGPA" value="3.5" step="0.1" min="0" max="4" onchange="calculateCGPA()">
+                    <span>/ 4.0</span>
+                </div>
+                <div class="target-feedback" id="targetFeedback"></div>
+            </div>
+
+            <div class="summary-stats">
+                <div><h4 id="totalCredits">0</h4><p>Total Credits</p></div>
+                <div><h4 id="totalCourses">0</h4><p>Courses</p></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSem = 1;
+        let semData = { 1: [], 2: [], 3: [] };
+
+        function switchSemester(num) {
+            currentSem = num;
+            document.querySelectorAll('.sem-tab').forEach((tab, idx) => {
+                tab.classList.toggle('active', idx === num - 1);
+            });
+            renderTable();
+        }
+
+        function addCourse() {
+            const name = document.getElementById('cName').value || 'Course ' + (semData[currentSem].length + 1);
+            const credits = parseFloat(document.getElementById('cCredits').value);
+            const grade = parseFloat(document.getElementById('cGrade').value);
+
+            if(!credits || credits <= 0) return alert("Enter valid credits.");
+
+            semData[currentSem].push({ name, credits, grade });
+            document.getElementById('cName').value = '';
+            document.getElementById('cCredits').value = '';
+            renderTable();
+        }
+
+        function removeCourse(index) {
+            semData[currentSem].splice(index, 1);
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('courseTableBody');
+            tbody.innerHTML = '';
+            semData[currentSem].forEach((course, idx) => {
+                tbody.innerHTML += `<tr>
+                    <td>${course.name}</td>
+                    <td>${course.credits}</td>
+                    <td>${course.grade.toFixed(1)}</td>
+                    <td><button class="del" onclick="removeCourse(${idx})">×</button></td>
+                </tr>`;
+            });
+            calculateCGPA();
+        }
+
+        function calculateCGPA() {
+            let totalCredits = parseFloat(document.getElementById('prevCredits').value) || 0;
+            let prevCgpa = parseFloat(document.getElementById('prevCGPA').value) || 0;
+            let totalPoints = totalCredits * prevCgpa;
+            let totalCourses = 0;
+
+            for(let sem in semData) {
+                semData[sem].forEach(c => {
+                    totalCredits += c.credits;
+                    totalPoints += (c.grade * c.credits);
+                    totalCourses++;
+                });
+            }
+
+            let cgpa = totalCredits > 0 ? (totalPoints / totalCredits) : 0;
+            
+            document.getElementById('cgpaDisplay').innerText = cgpa.toFixed(2);
+            document.getElementById('totalCredits').innerText = totalCredits;
+            document.getElementById('totalCourses').innerText = totalCourses;
+
+            const circle = document.getElementById('progressCircle');
+            const circumference = 2 * Math.PI * 90;
+            const percent = Math.min(cgpa / 4.0, 1);
+            circle.style.strokeDashoffset = circumference - (percent * circumference);
+
+            if(cgpa >= 3.5) circle.style.stroke = '#00ff88';
+            else if(cgpa >= 3.0) circle.style.stroke = '#ffbd2e';
+            else circle.style.stroke = '#ff5f56';
+
+            // Target CGPA Logic
+            const target = parseFloat(document.getElementById('targetCGPA').value) || 0;
+            const feedback = document.getElementById('targetFeedback');
+            
+            if(target > 4.0 || target <= 0) {
+                feedback.innerText = "Invalid target.";
+                feedback.style.color = "#ff5f56";
+                return;
+            }
+
+            if(cgpa >= target) {
+                feedback.innerText = "You've met or exceeded your target!";
+                feedback.style.color = "#00ff88";
+            } else {
+                // Math to find how many remaining credits need an A (4.0) to reach the target
+                // Target = (CurrentPoints + (4.0 * RemainingCredits)) / (CurrentCredits + RemainingCredits)
+                // Solving for RemainingCredits (x):
+                // Target*CurrentCredits + Target*x = CurrentPoints + 4*x
+                // Target*x - 4*x = CurrentPoints - Target*CurrentCredits
+                // x = (CurrentPoints - Target*CurrentCredits) / (Target - 4)
+                
+                if (target === 4.0) {
+                    feedback.innerText = "You cannot reach a 4.0 if you've had any grade below an A.";
+                    feedback.style.color = "#ff5f56";
+                } else {
+                    let x = (totalPoints - target * totalCredits) / (target - 4.0);
+                    
+                    if (x > 0) {
+                        feedback.innerText = `You need ${Math.ceil(x)} more credits with straight A's to hit ${target}.`;
+                        feedback.style.color = "#ffbd2e";
+                    } else {
+                        feedback.innerText = `Even with remaining credits, the target may be mathematically unreachable based on current standings.`;
+                        feedback.style.color = "#ff5f56";
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
